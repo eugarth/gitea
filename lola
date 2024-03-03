@@ -1,0 +1,42 @@
+mkdir myproject && cd myproject
+go mod init myproject
+cat <<EOF > main.go
+package main
+
+import (
+    "fmt"
+
+    "github.com/gin-gonic/gin"
+    "github.com/gobuffalo/packr/v2"
+)
+
+func main() {
+    r := gin.Default()
+    box := packr.New("templates", "./templates")
+
+    r.GET("/", func(c *gin.Context) {
+        str, err := box.FindString("index.html")
+        if err != nil {
+            c.String(500, fmt.Sprintf("Error: %s", err))
+            return
+        }
+        c.String(200, str)
+    })
+    r.Run(":8080")
+}
+EOF
+mkdir templates && cat <<EOF > templates/index.html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>pkgx Example</title>
+</head>
+<body>
+    <h1>Hello, World!</h1>
+</body>
+</html>
+EOF
+go get -u github.com/gin-gonic/gin
+go get -u github.com/gobuffalo/packr/v2/packr2
+packr2 build
+./myproject
